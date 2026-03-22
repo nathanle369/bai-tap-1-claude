@@ -1,14 +1,1404 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Claude Co-work Mastery — Nhân viên AI 24/7 của bạn</title>
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=Syne+Mono&display=swap" rel="stylesheet">
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanh toán — Claude Co-work Mastery</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=Syne+Mono&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   BIẾN MÀU & RESET
+═══════════════════════════════════════════ */
+:root {
+  --black:  #080807;
+  --black2: #0f0e0c;
+  --black3: #161512;
+  --card:   #1a1916;
+  --gold:   #c9a84c;
+  --gold2:  #e8c66a;
+  --gold-dim:    rgba(201,168,76,0.12);
+  --gold-border: rgba(201,168,76,0.22);
+  --amber:  #d4820a;
+  --red:    #c94c4c;
+  --green:  #4caf7d;
+  --green2: rgba(76,175,125,0.12);
+  --blue:   #4c8ecf;
+  --white:  #f0ead8;
+  --white2: #b8aa90;
+  --white3: #6b6050;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  background: var(--black);
+  color: var(--white);
+  font-family: 'Syne', sans-serif;
+  font-size:15px; line-height:1.65;
+  min-height:100vh;
+}
+body::after {
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)' opacity='0.03'/%3E%3C/svg%3E");
+}
 
+/* ═══════════════════════════════════════════
+   LAYOUT CHÍNH
+═══════════════════════════════════════════ */
+.page-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 80px;
+  position: relative; z-index:1;
+}
+
+/* HEADER */
+.site-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px 0 32px;
+  border-bottom:1px solid var(--gold-border);
+  margin-bottom:40px;
+}
+.logo { font-size:16px; font-weight:800; letter-spacing:2px; color:var(--gold); text-transform:uppercase; }
+.secure-badge {
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--white3); letter-spacing:1px;
+}
+.secure-badge::before { content:'🔒'; font-size:14px; }
+
+/* BREADCRUMB */
+.breadcrumb {
+  display:flex; align-items:center; gap:0;
+  margin-bottom:40px;
+}
+.bc-step {
+  display:flex; align-items:center; gap:10px;
+  font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+}
+.bc-num {
+  width:28px; height:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne Mono',monospace; font-size:12px;
+}
+.bc-step.done .bc-num  { background:var(--green); color:#fff; }
+.bc-step.active .bc-num { background:var(--gold); color:var(--black); }
+.bc-step.pending .bc-num { background:rgba(255,255,255,0.06); color:var(--white3); }
+.bc-step.done .bc-label, .bc-step.active .bc-label { color:var(--white); }
+.bc-step.pending .bc-label { color:var(--white3); }
+.bc-arrow { padding:0 14px; color:var(--white3); font-size:14px; }
+
+/* MAIN GRID */
+.checkout-grid {
+  display:grid; grid-template-columns:1fr 400px; gap:32px; align-items:start;
+}
+@media(max-width:800px){
+  .checkout-grid { grid-template-columns:1fr; }
+}
+
+/* ═══ LEFT: FORM PANELS ═══ */
+.panel {
+  background:var(--card); border:1px solid var(--gold-border);
+  border-radius:8px; margin-bottom:20px; overflow:hidden;
+}
+.panel-head {
+  display:flex; align-items:center; gap:14px;
+  padding:20px 28px; border-bottom:1px solid var(--gold-border);
+  background:rgba(201,168,76,0.04);
+}
+.panel-num {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--gold-dim); border:1px solid var(--gold-border);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne Mono',monospace; font-size:13px; color:var(--gold); flex-shrink:0;
+}
+.panel-title { font-size:16px; font-weight:700; }
+.panel-body { padding:28px; }
+
+/* FORM */
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+.form-row.full { grid-template-columns:1fr; }
+.form-group { display:flex; flex-direction:column; gap:6px; }
+.form-group label {
+  font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--white2);
+}
+.form-group label .req { color:var(--red); margin-left:2px; }
+.form-input {
+  background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+  border-radius:4px; padding:12px 16px;
+  font-family:'Syne',sans-serif; font-size:14px; color:var(--white);
+  transition:all 0.2s; outline:none;
+  width:100%;
+}
+.form-input:focus { border-color:var(--gold); background:rgba(201,168,76,0.04); box-shadow:0 0 0 3px rgba(201,168,76,0.1); }
+.form-input.error { border-color:var(--red); background:rgba(201,76,76,0.04); }
+.form-input.valid { border-color:var(--green); }
+.form-input::placeholder { color:var(--white3); }
+.field-error { font-size:12px; color:var(--red); margin-top:2px; display:none; }
+.field-error.show { display:block; }
+
+/* PAYMENT METHODS */
+.pay-methods {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:24px;
+}
+.pay-method {
+  border:2px solid rgba(255,255,255,0.08); border-radius:6px;
+  padding:16px 18px; cursor:pointer;
+  display:flex; align-items:center; gap:12px;
+  transition:all 0.2s; position:relative;
+  background:rgba(255,255,255,0.02);
+}
+.pay-method:hover { border-color:var(--gold-border); }
+.pay-method.selected { border-color:var(--gold); background:var(--gold-dim); }
+.pay-method input[type=radio] { display:none; }
+.pay-logo { font-size:22px; flex-shrink:0; }
+.pay-info { flex:1; }
+.pay-name { font-size:13px; font-weight:700; }
+.pay-sub  { font-size:11px; color:var(--white3); margin-top:2px; }
+.pay-check {
+  width:18px; height:18px; border-radius:50%;
+  border:2px solid var(--gold-border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; flex-shrink:0; transition:all 0.2s;
+}
+.pay-method.selected .pay-check { background:var(--gold); border-color:var(--gold); color:var(--black); }
+
+/* CARD FIELDS */
+.card-fields { display:none; }
+.card-fields.show { display:block; }
+.card-num-wrap { position:relative; }
+.card-num-icons {
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  display:flex; gap:4px; font-size:18px;
+}
+
+/* QR SECTION */
+.qr-section { display:none; }
+.qr-section.show {
+  display:flex; align-items:flex-start; gap:24px;
+  background:rgba(255,255,255,0.02); border:1px solid var(--gold-border);
+  border-radius:6px; padding:24px; margin-top:8px;
+}
+.qr-box {
+  width:160px; height:160px; flex-shrink:0;
+  background:#fff; border-radius:8px; padding:8px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+.qr-box svg { width:100%; height:100%; }
+.qr-info h4 { font-size:15px; font-weight:700; color:var(--gold); margin-bottom:8px; }
+.qr-info p  { font-size:13px; color:var(--white2); line-height:1.7; margin-bottom:6px; }
+.qr-amount {
+  font-family:'Instrument Serif',serif;
+  font-size:28px; font-style:italic; color:var(--gold); display:block; margin:8px 0;
+}
+.qr-note { font-size:12px; color:var(--white3); padding:8px 12px; background:rgba(201,168,76,0.06); border-radius:4px; }
+
+/* TEST MODE BANNER */
+.test-mode-banner {
+  background:linear-gradient(135deg,rgba(76,142,207,0.15),rgba(76,142,207,0.05));
+  border:1px solid rgba(76,142,207,0.3); border-radius:6px;
+  padding:16px 20px; margin-bottom:20px;
+  display:flex; align-items:flex-start; gap:14px;
+}
+.test-icon { font-size:20px; flex-shrink:0; }
+.test-text strong { font-size:13px; color:#7ab8e8; display:block; margin-bottom:4px; }
+.test-text p { font-size:12px; color:var(--white3); line-height:1.6; }
+.test-toggle-wrap {
+  margin-left:auto; flex-shrink:0;
+}
+.test-toggle {
+  position:relative; width:44px; height:24px; cursor:pointer;
+}
+.test-toggle input { display:none; }
+.toggle-track {
+  position:absolute; inset:0; border-radius:12px;
+  background:rgba(255,255,255,0.1); transition:background 0.3s;
+}
+.test-toggle input:checked + .toggle-track { background:var(--blue); }
+.toggle-thumb {
+  position:absolute; top:3px; left:3px;
+  width:18px; height:18px; border-radius:50%;
+  background:#fff; transition:transform 0.3s;
+  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+.test-toggle input:checked ~ .toggle-thumb { transform:translateX(20px); }
+
+/* SUBMIT BUTTON */
+.submit-btn {
+  width:100%; padding:18px;
+  background:linear-gradient(135deg,var(--gold),var(--amber));
+  color:var(--black); border:none; border-radius:4px;
+  font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
+  letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; transition:all 0.3s;
+  position:relative; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; gap:10px;
+  margin-top:8px;
+}
+.submit-btn:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(201,168,76,0.3); }
+.submit-btn:disabled { opacity:0.5; cursor:not-allowed; transform:none; }
+.submit-btn .btn-spinner {
+  width:18px; height:18px; border:2px solid rgba(0,0,0,0.3);
+  border-top-color:var(--black); border-radius:50%;
+  animation:spin 0.7s linear infinite; display:none;
+}
+.submit-btn.loading .btn-text { display:none; }
+.submit-btn.loading .btn-spinner { display:block; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+.pay-disclaimer {
+  text-align:center; font-size:12px; color:var(--white3);
+  margin-top:12px; line-height:1.6;
+}
+
+/* ═══ RIGHT: ORDER SUMMARY ═══ */
+.order-summary { position:sticky; top:24px; }
+.summary-box {
+  background:var(--card); border:1px solid var(--gold-border);
+  border-radius:8px; overflow:hidden;
+}
+.summary-head {
+  padding:20px 24px; border-bottom:1px solid var(--gold-border);
+  font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  color:var(--gold);
+}
+.product-row {
+  display:flex; gap:16px; align-items:flex-start;
+  padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.product-thumb {
+  width:56px; height:56px; border-radius:6px; flex-shrink:0;
+  background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(201,168,76,0.05));
+  border:1px solid var(--gold-border);
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+}
+.product-info .p-name { font-size:14px; font-weight:700; margin-bottom:4px; }
+.product-info .p-desc { font-size:12px; color:var(--white3); }
+.product-info .p-qty  { font-size:12px; color:var(--white3); margin-top:2px; }
+
+.summary-lines { padding:16px 24px; }
+.s-line {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; font-size:13px; border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.s-line:last-child { border:none; }
+.s-line .s-label { color:var(--white2); }
+.s-line .s-val   { font-weight:600; }
+.s-line.strike .s-val { text-decoration:line-through; color:var(--white3); }
+.s-line.discount .s-val { color:var(--green); }
+.total-line {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:20px 24px; border-top:2px solid var(--gold-border);
+  margin:0;
+}
+.total-label { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.total-val {
+  font-family:'Instrument Serif',serif;
+  font-size:32px; font-style:italic; color:var(--gold);
+}
+
+.includes-box { padding:20px 24px; border-top:1px solid rgba(255,255,255,0.05); }
+.includes-title {
+  font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  color:var(--white3); margin-bottom:12px;
+}
+.include-item {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:12px; color:var(--white2); padding:5px 0;
+}
+.include-item::before { content:'◆'; color:var(--gold); font-size:8px; flex-shrink:0; margin-top:3px; }
+
+.guarantee-mini {
+  margin:16px 24px 20px; padding:14px 16px;
+  background:var(--green2); border:1px solid rgba(76,175,125,0.25);
+  border-radius:4px; display:flex; align-items:center; gap:12px;
+}
+.guarantee-mini span { font-size:22px; flex-shrink:0; }
+.guarantee-mini p { font-size:12px; color:var(--white2); line-height:1.5; }
+.guarantee-mini strong { color:var(--green); }
+
+/* ═══ SUCCESS MODAL ═══ */
+.modal-overlay {
+  position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,0.85); backdrop-filter:blur(8px);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px; opacity:0; pointer-events:none;
+  transition:opacity 0.4s;
+}
+.modal-overlay.show { opacity:1; pointer-events:all; }
+.modal {
+  background:var(--card); border:1px solid var(--gold);
+  border-radius:12px; padding:56px 48px;
+  max-width:540px; width:100%; text-align:center;
+  transform:translateY(24px) scale(0.97); transition:transform 0.4s;
+  position:relative;
+}
+.modal-overlay.show .modal { transform:none; }
+.modal-icon { font-size:72px; margin-bottom:24px; animation:popIn 0.5s 0.2s both; display:block; }
+@keyframes popIn {
+  0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)}
+}
+.modal-title {
+  font-family:'Instrument Serif',serif;
+  font-size:36px; font-style:italic; color:var(--gold);
+  margin-bottom:12px; line-height:1.2;
+}
+.modal-sub { font-size:15px; color:var(--white2); line-height:1.7; margin-bottom:32px; }
+.modal-order-id {
+  font-family:'Syne Mono',monospace; font-size:12px;
+  color:var(--white3); background:rgba(255,255,255,0.04);
+  padding:8px 16px; border-radius:4px; display:inline-block;
+  margin-bottom:32px;
+}
+
+.download-btn {
+  display:inline-flex; align-items:center; gap:12px;
+  background:linear-gradient(135deg,var(--gold),var(--amber));
+  color:var(--black); text-decoration:none;
+  padding:18px 48px; border-radius:4px;
+  font-family:'Syne',sans-serif; font-size:15px; font-weight:800;
+  letter-spacing:1px; text-transform:uppercase;
+  transition:all 0.3s; cursor:pointer; border:none;
+  width:100%; justify-content:center; margin-bottom:12px;
+}
+.download-btn:hover { transform:translateY(-2px); box-shadow:0 8px 30px rgba(201,168,76,0.3); }
+
+.email-notice {
+  font-size:12px; color:var(--white3); margin-top:16px; line-height:1.6;
+}
+.email-notice strong { color:var(--white2); }
+
+.modal-security {
+  display:flex; gap:20px; justify-content:center; flex-wrap:wrap;
+  margin-top:24px; padding-top:20px; border-top:1px solid rgba(255,255,255,0.06);
+}
+.modal-security span { font-size:11px; color:var(--white3); }
+
+/* CONFIG PANEL (admin-only) */
+.config-panel {
+  position:fixed; bottom:24px; right:24px; z-index:500;
+}
+.config-toggle {
+  width:40px; height:40px; border-radius:50%;
+  background:var(--black3); border:1px solid var(--gold-border);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; font-size:16px; transition:all 0.2s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.4);
+}
+.config-toggle:hover { border-color:var(--gold); }
+.config-box {
+  position:absolute; bottom:52px; right:0;
+  width:340px; background:var(--black2);
+  border:1px solid var(--gold-border); border-radius:8px;
+  padding:24px; display:none; box-shadow:0 20px 60px rgba(0,0,0,0.6);
+}
+.config-box.open { display:block; }
+.config-title {
+  font-size:12px; font-weight:700; letter-spacing:2px; text-transform:uppercase;
+  color:var(--gold); margin-bottom:16px;
+  display:flex; align-items:center; gap:8px;
+}
+.config-title::before { content:'⚙️'; }
+.config-group { margin-bottom:14px; }
+.config-group label {
+  font-size:11px; color:var(--white3); letter-spacing:1px; display:block; margin-bottom:5px;
+}
+.config-input {
+  width:100%; background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1); border-radius:4px;
+  padding:9px 12px; font-family:'Syne Mono',monospace;
+  font-size:12px; color:var(--white); outline:none;
+  transition:border 0.2s;
+}
+.config-input:focus { border-color:var(--gold); }
+.config-save {
+  width:100%; padding:10px; border-radius:4px;
+  background:var(--gold-dim); border:1px solid var(--gold-border);
+  color:var(--gold); font-family:'Syne',sans-serif;
+  font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; transition:all 0.2s; margin-top:4px;
+}
+.config-save:hover { background:var(--gold-dim); border-color:var(--gold); }
+.config-status {
+  font-size:11px; text-align:center; margin-top:8px;
+  color:var(--green); display:none;
+}
+.config-status.show { display:block; }
+.config-note {
+  font-size:11px; color:var(--white3); line-height:1.6;
+  padding:10px 12px; background:rgba(255,255,255,0.02);
+  border-radius:4px; margin-top:12px; border-left:2px solid var(--gold-border);
+}
+
+/* LOADING OVERLAY */
+.pay-loading {
+  position:fixed; inset:0; z-index:900;
+  background:rgba(8,8,7,0.95); display:none;
+  flex-direction:column; align-items:center; justify-content:center; gap:20px;
+}
+.pay-loading.show { display:flex; }
+.pay-spinner {
+  width:56px; height:56px; border:3px solid rgba(201,168,76,0.2);
+  border-top-color:var(--gold); border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+.pay-loading-text { font-size:15px; color:var(--white2); }
+.pay-loading-sub  { font-size:12px; color:var(--white3); }
+
+/* VNPAY REDIRECT INFO */
+.redirect-info {
+  background:rgba(76,142,207,0.08); border:1px solid rgba(76,142,207,0.2);
+  border-radius:6px; padding:16px 20px; margin-top:16px; display:none;
+}
+.redirect-info.show { display:block; }
+.redirect-info p { font-size:13px; color:var(--white2); line-height:1.65; }
+.redirect-info strong { color:#7ab8e8; }
+
+/* UTILS */
+.mt8{margin-top:8px} .mt16{margin-top:16px} .mt24{margin-top:24px}
+.flex-center{display:flex;align-items:center;gap:8px}
+.text-gold{color:var(--gold)}
+.text-small{font-size:12px;color:var(--white3)}
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="pay-loading" id="payLoading">
+  <div class="pay-spinner"></div>
+  <div class="pay-loading-text" id="loadingText">Đang xử lý thanh toán...</div>
+  <div class="pay-loading-sub" id="loadingSubText">Vui lòng không tắt trang này</div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <span class="modal-icon">🎉</span>
+    <h2 class="modal-title">Thanh toán thành công!</h2>
+    <p class="modal-sub">Cảm ơn bạn đã tin tưởng. Ebook <strong>Claude Co-work Mastery</strong> đã sẵn sàng để tải về.</p>
+    <div class="modal-order-id" id="modalOrderId">Mã đơn: #CCW-000000</div>
+
+    <a class="download-btn" id="downloadBtn" href="#" download>
+      ⬇️ &nbsp; Tải Ebook PDF ngay
+    </a>
+    <button class="download-btn" id="downloadBonusBtn" style="background:rgba(201,168,76,0.1);border:1px solid var(--gold-border);color:var(--gold);margin-bottom:0">
+      🧩 &nbsp; Tải 7 Skills (ZIP)
+    </button>
+
+    <p class="email-notice">
+      📧 Chúng tôi đã gửi link tải về email <strong id="modalEmail">bạn@email.com</strong><br>
+      Link có hiệu lực trong <strong>72 giờ</strong> và có thể tải tối đa <strong>5 lần</strong>.
+    </p>
+
+    <div class="modal-security">
+      <span>🔒 Giao dịch an toàn</span>
+      <span>📱 Truy cập trọn đời</span>
+      <span>♾ Cập nhật miễn phí</span>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN PAGE -->
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="logo">⚡ Claude Co-work</div>
+    <div class="secure-badge">Thanh toán bảo mật SSL</div>
+  </header>
+
+  <!-- BREADCRUMB -->
+  <div class="breadcrumb">
+    <div class="bc-step done">
+      <div class="bc-num">✓</div>
+      <div class="bc-label">Sản phẩm</div>
+    </div>
+    <div class="bc-arrow">›</div>
+    <div class="bc-step active">
+      <div class="bc-num">2</div>
+      <div class="bc-label">Thông tin</div>
+    </div>
+    <div class="bc-arrow">›</div>
+    <div class="bc-step active">
+      <div class="bc-num">3</div>
+      <div class="bc-label">Thanh toán</div>
+    </div>
+    <div class="bc-arrow">›</div>
+    <div class="bc-step pending" id="bc-confirm">
+      <div class="bc-num">4</div>
+      <div class="bc-label">Xác nhận</div>
+    </div>
+  </div>
+
+  <!-- TEST MODE BANNER -->
+  <div class="test-mode-banner" id="testBanner">
+    <div class="test-icon">🧪</div>
+    <div class="test-text">
+      <strong>CHẾ ĐỘ KIỂM TRA (TEST MODE) — Đang bật</strong>
+      <p>Không có giao dịch thực nào được thực hiện. Nhập thông tin hợp lệ và nhấn thanh toán để thử nghiệm luồng download. Tắt khi deploy thật.</p>
+    </div>
+    <label class="test-toggle test-toggle-wrap" title="Bật/tắt Test Mode">
+      <input type="checkbox" id="testModeSwitch" checked onchange="toggleTestMode(this.checked)">
+      <div class="toggle-track"></div>
+      <div class="toggle-thumb"></div>
+    </label>
+  </div>
+
+  <!-- MAIN GRID -->
+  <div class="checkout-grid">
+
+    <!-- ══ LEFT COLUMN ══ -->
+    <div class="left-col">
+
+      <!-- PANEL 1: THÔNG TIN CÁ NHÂN -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-num">1</div>
+          <div class="panel-title">Thông tin của bạn</div>
+        </div>
+        <div class="panel-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Họ <span class="req">*</span></label>
+              <input class="form-input" id="firstName" type="text" placeholder="Nguyễn" autocomplete="given-name">
+              <span class="field-error" id="err-firstName">Vui lòng nhập họ</span>
+            </div>
+            <div class="form-group">
+              <label>Tên <span class="req">*</span></label>
+              <input class="form-input" id="lastName" type="text" placeholder="Minh Châu" autocomplete="family-name">
+              <span class="field-error" id="err-lastName">Vui lòng nhập tên</span>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Email nhận Ebook <span class="req">*</span></label>
+              <input class="form-input" id="email" type="email" placeholder="ban@email.com" autocomplete="email">
+              <span class="field-error" id="err-email">Email không hợp lệ</span>
+            </div>
+          </div>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Số điện thoại <span class="req">*</span></label>
+              <input class="form-input" id="phone" type="tel" placeholder="09xxxxxxxx" autocomplete="tel">
+              <span class="field-error" id="err-phone">Số điện thoại không hợp lệ</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL 2: PHƯƠNG THỨC THANH TOÁN -->
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-num">2</div>
+          <div class="panel-title">Phương thức thanh toán</div>
+        </div>
+        <div class="panel-body">
+
+          <div class="pay-methods">
+            <!-- VNPay QR -->
+            <label class="pay-method selected" id="method-vnpay" onclick="selectMethod('vnpay')">
+              <input type="radio" name="paymethod" value="vnpay" checked>
+              <div class="pay-logo">🏦</div>
+              <div class="pay-info">
+                <div class="pay-name">VNPay QR</div>
+                <div class="pay-sub">Vietcombank · 34 ngân hàng</div>
+              </div>
+              <div class="pay-check">✓</div>
+            </label>
+
+            <!-- Chuyển khoản trực tiếp -->
+            <label class="pay-method" id="method-transfer" onclick="selectMethod('transfer')">
+              <input type="radio" name="paymethod" value="transfer">
+              <div class="pay-logo">💸</div>
+              <div class="pay-info">
+                <div class="pay-name">Chuyển khoản</div>
+                <div class="pay-sub">Vietcombank trực tiếp</div>
+              </div>
+              <div class="pay-check"></div>
+            </label>
+
+            <!-- Thẻ quốc tế -->
+            <label class="pay-method" id="method-card" onclick="selectMethod('card')">
+              <input type="radio" name="paymethod" value="card">
+              <div class="pay-logo">💳</div>
+              <div class="pay-info">
+                <div class="pay-name">Thẻ tín dụng</div>
+                <div class="pay-sub">Visa · Mastercard · JCB</div>
+              </div>
+              <div class="pay-check"></div>
+            </label>
+
+            <!-- Momo -->
+            <label class="pay-method" id="method-momo" onclick="selectMethod('momo')">
+              <input type="radio" name="paymethod" value="momo">
+              <div class="pay-logo">🟣</div>
+              <div class="pay-info">
+                <div class="pay-name">MoMo</div>
+                <div class="pay-sub">Ví điện tử MoMo</div>
+              </div>
+              <div class="pay-check"></div>
+            </label>
+          </div>
+
+          <!-- VNPAY INFO -->
+          <div id="vnpay-info">
+            <div style="background:rgba(201,168,76,0.05);border:1px solid var(--gold-border);border-radius:6px;padding:16px 20px;margin-bottom:16px">
+              <p style="font-size:13px;color:var(--white2);line-height:1.7">
+                ✅ Bạn sẽ được chuyển đến cổng thanh toán <strong style="color:var(--gold)">VNPay</strong> để quét mã QR hoặc thanh toán qua Internet Banking <strong>Vietcombank</strong> và 33 ngân hàng khác. Sau khi thanh toán thành công, bạn sẽ được chuyển về để tải file.
+              </p>
+            </div>
+            <div class="redirect-info" id="vnpayRedirectInfo">
+              <p>⏳ Đang tạo đơn hàng và chuyển đến VNPay... <strong>Vui lòng không tắt trang</strong></p>
+            </div>
+          </div>
+
+          <!-- TRANSFER QR -->
+          <div class="qr-section" id="transfer-section">
+            <div class="qr-box" id="qrCodeBox">
+              <!-- QR SVG will be generated here -->
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" fill="white"/>
+                <!-- QR pattern (simplified visual) -->
+                <g fill="#000">
+                  <!-- Top-left finder -->
+                  <rect x="5" y="5" width="25" height="25"/>
+                  <rect x="9" y="9" width="17" height="17" fill="white"/>
+                  <rect x="13" y="13" width="9" height="9"/>
+                  <!-- Top-right finder -->
+                  <rect x="70" y="5" width="25" height="25"/>
+                  <rect x="74" y="9" width="17" height="17" fill="white"/>
+                  <rect x="78" y="13" width="9" height="9"/>
+                  <!-- Bottom-left finder -->
+                  <rect x="5" y="70" width="25" height="25"/>
+                  <rect x="9" y="74" width="17" height="17" fill="white"/>
+                  <rect x="13" y="78" width="9" height="9"/>
+                  <!-- Data dots -->
+                  <rect x="35" y="5"  width="4" height="4"/>
+                  <rect x="43" y="5"  width="4" height="4"/>
+                  <rect x="51" y="5"  width="4" height="4"/>
+                  <rect x="59" y="5"  width="4" height="4"/>
+                  <rect x="35" y="13" width="4" height="4"/>
+                  <rect x="51" y="13" width="4" height="4"/>
+                  <rect x="35" y="21" width="4" height="4"/>
+                  <rect x="43" y="21" width="4" height="4"/>
+                  <rect x="59" y="21" width="4" height="4"/>
+                  <rect x="35" y="35" width="4" height="4"/>
+                  <rect x="43" y="35" width="4" height="4"/>
+                  <rect x="51" y="35" width="4" height="4"/>
+                  <rect x="35" y="43" width="4" height="4"/>
+                  <rect x="59" y="43" width="4" height="4"/>
+                  <rect x="5"  y="35" width="4" height="4"/>
+                  <rect x="13" y="35" width="4" height="4"/>
+                  <rect x="21" y="35" width="4" height="4"/>
+                  <rect x="21" y="43" width="4" height="4"/>
+                  <rect x="5"  y="51" width="4" height="4"/>
+                  <rect x="13" y="51" width="4" height="4"/>
+                  <rect x="5"  y="59" width="4" height="4"/>
+                  <rect x="21" y="59" width="4" height="4"/>
+                  <rect x="35" y="51" width="4" height="4"/>
+                  <rect x="43" y="51" width="4" height="4"/>
+                  <rect x="51" y="51" width="4" height="4"/>
+                  <rect x="59" y="51" width="4" height="4"/>
+                  <rect x="67" y="51" width="4" height="4"/>
+                  <rect x="35" y="59" width="4" height="4"/>
+                  <rect x="51" y="59" width="4" height="4"/>
+                  <rect x="67" y="59" width="4" height="4"/>
+                  <rect x="75" y="35" width="4" height="4"/>
+                  <rect x="83" y="35" width="4" height="4"/>
+                  <rect x="91" y="35" width="4" height="4"/>
+                  <rect x="75" y="43" width="4" height="4"/>
+                  <rect x="91" y="43" width="4" height="4"/>
+                  <rect x="67" y="35" width="4" height="4"/>
+                  <rect x="43" y="67" width="4" height="4"/>
+                  <rect x="51" y="67" width="4" height="4"/>
+                  <rect x="59" y="67" width="4" height="4"/>
+                  <rect x="67" y="67" width="4" height="4"/>
+                  <rect x="75" y="67" width="4" height="4"/>
+                  <rect x="83" y="67" width="4" height="4"/>
+                  <rect x="91" y="67" width="4" height="4"/>
+                  <rect x="43" y="75" width="4" height="4"/>
+                  <rect x="59" y="75" width="4" height="4"/>
+                  <rect x="75" y="75" width="4" height="4"/>
+                  <rect x="83" y="75" width="4" height="4"/>
+                  <rect x="43" y="83" width="4" height="4"/>
+                  <rect x="51" y="83" width="4" height="4"/>
+                  <rect x="67" y="83" width="4" height="4"/>
+                  <rect x="83" y="83" width="4" height="4"/>
+                  <rect x="91" y="83" width="4" height="4"/>
+                  <rect x="43" y="91" width="4" height="4"/>
+                  <rect x="59" y="91" width="4" height="4"/>
+                  <rect x="67" y="91" width="4" height="4"/>
+                  <rect x="75" y="91" width="4" height="4"/>
+                  <rect x="91" y="91" width="4" height="4"/>
+                </g>
+                <!-- Logo center -->
+                <rect x="42" y="42" width="16" height="16" rx="2" fill="#c9a84c"/>
+                <text x="50" y="53" text-anchor="middle" fill="#000" font-size="8" font-weight="bold">VCB</text>
+              </svg>
+            </div>
+            <div class="qr-info">
+              <h4>Quét mã QR để chuyển khoản</h4>
+              <p><strong style="color:var(--white)">Ngân hàng:</strong> Vietcombank</p>
+              <p><strong style="color:var(--white)">STK:</strong> <span id="bankAccount" style="font-family:'Syne Mono',monospace;color:var(--gold)">0123456789</span></p>
+              <p><strong style="color:var(--white)">Chủ TK:</strong> <span id="bankName">CÔNG TY TNHH XYZ</span></p>
+              <span class="qr-amount">299.000đ</span>
+              <div class="qr-note">📝 Nội dung CK: <strong id="transferContent">CCW-<span id="txCode">000000</span></strong> — Nhập đúng để kích hoạt tự động</div>
+            </div>
+          </div>
+
+          <!-- CARD FIELDS -->
+          <div class="card-fields" id="card-fields">
+            <div class="form-row full mt8">
+              <div class="form-group">
+                <label>Số thẻ <span class="req">*</span></label>
+                <div class="card-num-wrap">
+                  <input class="form-input" id="cardNumber" type="text" placeholder="0000 0000 0000 0000" maxlength="19" oninput="formatCardNum(this)">
+                  <div class="card-num-icons" id="cardIcons">💳</div>
+                </div>
+                <span class="field-error" id="err-cardNumber">Số thẻ không hợp lệ</span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Ngày hết hạn <span class="req">*</span></label>
+                <input class="form-input" id="cardExpiry" type="text" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this)">
+                <span class="field-error" id="err-cardExpiry">Ngày hết hạn không hợp lệ</span>
+              </div>
+              <div class="form-group">
+                <label>CVV <span class="req">*</span></label>
+                <input class="form-input" id="cardCvv" type="password" placeholder="•••" maxlength="4">
+                <span class="field-error" id="err-cardCvv">CVV không hợp lệ</span>
+              </div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Tên chủ thẻ <span class="req">*</span></label>
+                <input class="form-input" id="cardName" type="text" placeholder="NGUYEN MINH CHAU" style="text-transform:uppercase">
+                <span class="field-error" id="err-cardName">Vui lòng nhập tên chủ thẻ</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MOMO INFO -->
+          <div class="qr-section" id="momo-section" style="display:none;background:rgba(157,0,172,0.05);border-color:rgba(157,0,172,0.2)">
+            <div class="qr-box" style="background:linear-gradient(135deg,#ae2d68,#7b1f78);color:#fff;font-size:32px;border-radius:8px">🟣</div>
+            <div class="qr-info">
+              <h4 style="color:#e680c8">Thanh toán qua MoMo</h4>
+              <p>Số điện thoại MoMo: <strong id="momoPhone" style="font-family:'Syne Mono',monospace;color:#e680c8">0909000000</strong></p>
+              <span class="qr-amount" style="color:#e680c8">299.000đ</span>
+              <div class="qr-note">📝 Nội dung: <strong>CCW-<span id="txCodeMomo">000000</span></strong></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- SUBMIT -->
+      <button class="submit-btn" id="submitBtn" onclick="handleSubmit()">
+        <div class="btn-spinner"></div>
+        <span class="btn-text" id="submitBtnText">🔒 &nbsp; Thanh toán 299.000đ ngay</span>
+      </button>
+      <p class="pay-disclaimer">
+        🔒 Thông tin được mã hóa SSL 256-bit · Bảo mật bởi VNPay<br>
+        Bằng cách thanh toán, bạn đồng ý với <a href="#" style="color:var(--gold);text-decoration:none">Điều khoản dịch vụ</a>
+      </p>
+
+    </div><!-- /left-col -->
+
+    <!-- ══ RIGHT COLUMN: ORDER SUMMARY ══ -->
+    <div class="order-summary">
+      <div class="summary-box">
+        <div class="summary-head">📦 Đơn hàng của bạn</div>
+
+        <div class="product-row">
+          <div class="product-thumb">📘</div>
+          <div class="product-info">
+            <div class="p-name">Claude Co-work Mastery</div>
+            <div class="p-desc">Ebook PDF + 7 Skills ZIP + Templates</div>
+            <div class="p-qty">Truy cập ngay sau thanh toán</div>
+          </div>
+        </div>
+
+        <div class="summary-lines">
+          <div class="s-line strike">
+            <span class="s-label">Giá gốc</span>
+            <span class="s-val">1.345.000đ</span>
+          </div>
+          <div class="s-line discount">
+            <span class="s-label">🎉 Ưu đãi ra mắt (–78%)</span>
+            <span class="s-val">–1.046.000đ</span>
+          </div>
+          <div class="s-line">
+            <span class="s-label">Phí xử lý</span>
+            <span class="s-val" style="color:var(--green)">Miễn phí</span>
+          </div>
+        </div>
+
+        <div class="total-line">
+          <div class="total-label">Tổng cộng</div>
+          <div class="total-val">299.000đ</div>
+        </div>
+
+        <div class="includes-box">
+          <div class="includes-title">Bao gồm trong đơn</div>
+          <div class="include-item">Ebook PDF 120 trang đầy đủ</div>
+          <div class="include-item">7 Skills ZIP sẵn dùng ngay</div>
+          <div class="include-item">5 Template Claude MD theo ngành</div>
+          <div class="include-item">Hướng dẫn Zapier MCP</div>
+          <div class="include-item">Cộng đồng học viên trên School</div>
+          <div class="include-item">Cập nhật miễn phí trọn đời</div>
+        </div>
+
+        <div class="guarantee-mini">
+          <span>🛡️</span>
+          <p><strong>Hoàn tiền 30 ngày</strong> — Nếu không hài lòng, hoàn tiền 100% không hỏi lý do.</p>
+        </div>
+      </div>
+
+      <!-- TRUST BADGES -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+        <div style="background:var(--card);border:1px solid var(--gold-border);border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🔒</div>
+          <div style="font-size:11px;color:var(--white3)">SSL 256-bit<br>Bảo mật</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--gold-border);border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">⚡</div>
+          <div style="font-size:11px;color:var(--white3)">Giao hàng<br>tức thì</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--gold-border);border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">🏦</div>
+          <div style="font-size:11px;color:var(--white3)">Hỗ trợ<br>Vietcombank</div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--gold-border);border-radius:6px;padding:12px;text-align:center">
+          <div style="font-size:20px;margin-bottom:4px">💬</div>
+          <div style="font-size:11px;color:var(--white3)">CSKH<br>24/7</div>
+        </div>
+      </div>
+    </div><!-- /order-summary -->
+
+  </div><!-- /checkout-grid -->
+</div><!-- /page-wrap -->
+
+<!-- ═══ CONFIG PANEL (ADMIN) ═══ -->
+<div class="config-panel">
+  <div class="config-toggle" onclick="toggleConfig()" title="Cài đặt API">⚙️</div>
+  <div class="config-box" id="configBox">
+    <div class="config-title">Cài đặt Thanh toán</div>
+
+    <div class="config-group">
+      <label>VNPay TMN Code (Merchant ID)</label>
+      <input class="config-input" id="cfg-vnpayTmn" type="text" placeholder="Ví dụ: ABCD1234" value="">
+    </div>
+    <div class="config-group">
+      <label>VNPay Hash Secret</label>
+      <input class="config-input" id="cfg-vnpaySecret" type="password" placeholder="Secret key từ VNPay">
+    </div>
+    <div class="config-group">
+      <label>VNPay Return URL (sau thanh toán)</label>
+      <input class="config-input" id="cfg-returnUrl" type="text" placeholder="https://yoursite.com/payment-return">
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:16px 0"></div>
+    <div class="config-group">
+      <label>STK Vietcombank (hiển thị QR chuyển khoản)</label>
+      <input class="config-input" id="cfg-bankAccount" type="text" placeholder="0123456789" value="0123456789">
+    </div>
+    <div class="config-group">
+      <label>Tên chủ tài khoản</label>
+      <input class="config-input" id="cfg-bankName" type="text" placeholder="CONG TY TNHH ABC" value="CÔNG TY TNHH XYZ">
+    </div>
+    <div class="config-group">
+      <label>SĐT MoMo</label>
+      <input class="config-input" id="cfg-momoPhone" type="text" placeholder="0909000000" value="0909000000">
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,0.06);margin:16px 0"></div>
+    <div class="config-group">
+      <label>🔗 URL file PDF Ebook (Google Drive / CDN)</label>
+      <input class="config-input" id="cfg-pdfUrl" type="text" placeholder="https://drive.google.com/uc?id=FILE_ID&export=download" value="">
+    </div>
+    <div class="config-group">
+      <label>🔗 URL file Skills ZIP</label>
+      <input class="config-input" id="cfg-zipUrl" type="text" placeholder="https://drive.google.com/uc?id=FILE_ID&export=download" value="">
+    </div>
+
+    <button class="config-save" onclick="saveConfig()">💾 Lưu cấu hình</button>
+    <div class="config-status" id="configStatus">✓ Đã lưu thành công!</div>
+
+    <div class="config-note">
+      <strong style="color:var(--white2)">📋 Hướng dẫn nhanh:</strong><br>
+      1. Đăng ký tại <strong>vnpay.vn/merchant</strong> để nhận TMN Code + Secret<br>
+      2. Upload PDF lên Google Drive → Share → Copy link → Dán vào ô PDF URL<br>
+      3. Tắt Test Mode khi sẵn sàng go-live<br>
+      4. Set Return URL = domain của bạn + <code>/payment-return</code>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIG & STATE
+═══════════════════════════════════════════════════════ */
+let CONFIG = {
+  testMode:     true,
+  vnpayTmn:     '',
+  vnpaySecret:  '',
+  returnUrl:    window.location.href,
+  bankAccount:  '0123456789',
+  bankName:     'CÔNG TY TNHH XYZ',
+  momoPhone:    '0909000000',
+  pdfUrl:       '',  // <- điền URL PDF thật vào đây
+  zipUrl:       ''   // <- điền URL ZIP thật vào đây
+};
+
+const PRODUCT = {
+  name:     'Claude Co-work Mastery',
+  price:    299000,
+  currency: 'VND'
+};
+
+let currentMethod = 'vnpay';
+
+/* Load config từ localStorage */
+(function loadSavedConfig(){
+  const saved = localStorage.getItem('ccw_config');
+  if(saved){
+    try { CONFIG = {...CONFIG, ...JSON.parse(saved)}; } catch(e){}
+  }
+  applyConfig();
+})();
+
+function applyConfig(){
+  // Hiển thị STK và tên ngân hàng
+  const acc = CONFIG.bankAccount || '0123456789';
+  const nm  = CONFIG.bankName    || 'CÔNG TY TNHH XYZ';
+  const mo  = CONFIG.momoPhone   || '0909000000';
+  if(document.getElementById('bankAccount')) document.getElementById('bankAccount').textContent = acc;
+  if(document.getElementById('bankName'))    document.getElementById('bankName').textContent    = nm;
+  if(document.getElementById('momoPhone'))   document.getElementById('momoPhone').textContent   = mo;
+  // Sinh mã TX ngẫu nhiên
+  const tx = Math.floor(100000 + Math.random() * 900000);
+  ['txCode','txCodeMomo'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.textContent = tx;
+  });
+  // Sync fields trong config panel
+  ['vnpayTmn','vnpaySecret','returnUrl','bankAccount','bankName','momoPhone','pdfUrl','zipUrl'].forEach(k=>{
+    const el = document.getElementById('cfg-'+k);
+    if(el && CONFIG[k]) el.value = CONFIG[k];
+  });
+  // Sync test mode switch
+  const sw = document.getElementById('testModeSwitch');
+  if(sw) sw.checked = CONFIG.testMode;
+  const banner = document.getElementById('testBanner');
+  if(banner) banner.style.display = CONFIG.testMode ? 'flex' : 'none';
+}
+
+function saveConfig(){
+  CONFIG.vnpayTmn    = document.getElementById('cfg-vnpayTmn').value.trim();
+  CONFIG.vnpaySecret = document.getElementById('cfg-vnpaySecret').value.trim();
+  CONFIG.returnUrl   = document.getElementById('cfg-returnUrl').value.trim();
+  CONFIG.bankAccount = document.getElementById('cfg-bankAccount').value.trim();
+  CONFIG.bankName    = document.getElementById('cfg-bankName').value.trim();
+  CONFIG.momoPhone   = document.getElementById('cfg-momoPhone').value.trim();
+  CONFIG.pdfUrl      = document.getElementById('cfg-pdfUrl').value.trim();
+  CONFIG.zipUrl      = document.getElementById('cfg-zipUrl').value.trim();
+  localStorage.setItem('ccw_config', JSON.stringify(CONFIG));
+  applyConfig();
+  const st = document.getElementById('configStatus');
+  st.classList.add('show');
+  setTimeout(()=>st.classList.remove('show'), 2500);
+}
+
+function toggleConfig(){
+  document.getElementById('configBox').classList.toggle('open');
+}
+
+function toggleTestMode(on){
+  CONFIG.testMode = on;
+  localStorage.setItem('ccw_config', JSON.stringify(CONFIG));
+  const banner = document.getElementById('testBanner');
+  if(banner) banner.style.display = on ? 'flex' : 'none';
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAYMENT METHOD SELECTION
+═══════════════════════════════════════════════════════ */
+function selectMethod(method){
+  currentMethod = method;
+  // Reset tất cả
+  ['vnpay','transfer','card','momo'].forEach(m=>{
+    document.getElementById('method-'+m).classList.remove('selected');
+    document.getElementById('method-'+m).querySelector('.pay-check').textContent = '';
+  });
+  document.getElementById('method-'+method).classList.add('selected');
+  document.getElementById('method-'+method).querySelector('.pay-check').textContent = '✓';
+
+  // Ẩn tất cả content
+  document.getElementById('vnpay-info').style.display        = 'none';
+  document.getElementById('transfer-section').className      = 'qr-section';
+  document.getElementById('card-fields').className           = 'card-fields';
+  document.getElementById('momo-section').style.display      = 'none';
+
+  // Hiển thị theo method
+  if(method === 'vnpay')    document.getElementById('vnpay-info').style.display    = 'block';
+  if(method === 'transfer') document.getElementById('transfer-section').className  = 'qr-section show';
+  if(method === 'card')     document.getElementById('card-fields').className       = 'card-fields show';
+  if(method === 'momo')     document.getElementById('momo-section').style.display  = 'flex';
+
+  // Update button text
+  const labels = {
+    vnpay:    '🔒 Thanh toán qua VNPay — 299.000đ',
+    transfer: '✅ Tôi đã chuyển khoản — Xác nhận',
+    card:     '🔒 Thanh toán bằng thẻ — 299.000đ',
+    momo:     '🟣 Xác nhận đã thanh toán MoMo'
+  };
+  document.getElementById('submitBtnText').textContent = labels[method];
+}
+
+/* ═══════════════════════════════════════════════════════
+   FORM VALIDATION
+═══════════════════════════════════════════════════════ */
+function showError(id, msg){
+  const el = document.getElementById(id);
+  if(el){ el.classList.add('error'); }
+  const err = document.getElementById('err-'+id);
+  if(err){ err.textContent = msg; err.classList.add('show'); }
+  return false;
+}
+function clearError(id){
+  const el = document.getElementById(id);
+  if(el) el.classList.remove('error');
+  const err = document.getElementById('err-'+id);
+  if(err) err.classList.remove('show');
+}
+function markValid(id){
+  const el = document.getElementById(id);
+  if(el){ el.classList.remove('error'); el.classList.add('valid'); }
+}
+
+function validateInfo(){
+  let ok = true;
+  const first = document.getElementById('firstName').value.trim();
+  const last  = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+
+  if(!first){ showError('firstName','Vui lòng nhập họ'); ok=false; }
+  else markValid('firstName');
+
+  if(!last){ showError('lastName','Vui lòng nhập tên'); ok=false; }
+  else markValid('lastName');
+
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRx.test(email)){ showError('email','Email không hợp lệ (ví dụ: ban@gmail.com)'); ok=false; }
+  else markValid('email');
+
+  const phoneRx = /^(0|\+84)[3-9][0-9]{8}$/;
+  if(!phoneRx.test(phone.replace(/\s/g,''))){ showError('phone','SĐT không hợp lệ (ví dụ: 0901234567)'); ok=false; }
+  else markValid('phone');
+
+  return ok;
+}
+
+function validateCard(){
+  if(currentMethod !== 'card') return true;
+  let ok = true;
+  const num    = document.getElementById('cardNumber').value.replace(/\s/g,'');
+  const expiry = document.getElementById('cardExpiry').value;
+  const cvv    = document.getElementById('cardCvv').value;
+  const name   = document.getElementById('cardName').value.trim();
+
+  if(num.length < 16){ showError('cardNumber','Số thẻ phải có 16 chữ số'); ok=false; }
+  else markValid('cardNumber');
+
+  const exRx = /^(0[1-9]|1[0-2])\/([0-9]{2})$/;
+  if(!exRx.test(expiry)){ showError('cardExpiry','Định dạng MM/YY'); ok=false; }
+  else markValid('cardExpiry');
+
+  if(cvv.length < 3){ showError('cardCvv','CVV 3-4 chữ số'); ok=false; }
+  else markValid('cardCvv');
+
+  if(!name){ showError('cardName','Nhập tên như in trên thẻ'); ok=false; }
+  else markValid('cardName');
+
+  return ok;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD NUMBER FORMATTING
+═══════════════════════════════════════════════════════ */
+function formatCardNum(input){
+  let v = input.value.replace(/\D/g,'').slice(0,16);
+  input.value = v.replace(/(.{4})/g,'$1 ').trim();
+  const icons = document.getElementById('cardIcons');
+  if(v.startsWith('4')) icons.textContent = '💙';       // Visa
+  else if(v.startsWith('5')) icons.textContent = '🟠';   // Mastercard
+  else if(v.startsWith('3')) icons.textContent = '💎';   // Amex
+  else icons.textContent = '💳';
+}
+
+function formatExpiry(input){
+  let v = input.value.replace(/\D/g,'').slice(0,4);
+  if(v.length >= 3) v = v.slice(0,2)+'/'+v.slice(2);
+  input.value = v;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAIN SUBMIT HANDLER
+═══════════════════════════════════════════════════════ */
+async function handleSubmit(){
+  // Clear old errors
+  ['firstName','lastName','email','phone','cardNumber','cardExpiry','cardCvv','cardName'].forEach(clearError);
+
+  if(!validateInfo()) return;
+  if(!validateCard()) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.classList.add('loading');
+
+  if(CONFIG.testMode){
+    await simulateTestPayment();
+  } else {
+    await processRealPayment();
+  }
+
+  btn.classList.remove('loading');
+}
+
+/* ═══════════════════════════════════════════════════════
+   TEST MODE — GIẢ LẬP THANH TOÁN
+   Nhập đầy đủ thông tin → xử lý giả → mở download
+═══════════════════════════════════════════════════════ */
+async function simulateTestPayment(){
+  const loading = document.getElementById('payLoading');
+  const loadingText = document.getElementById('loadingText');
+  const loadingSubText = document.getElementById('loadingSubText');
+  loading.classList.add('show');
+
+  const steps = [
+    ['🔐 Đang mã hóa thông tin...', 'SSL 256-bit encryption'],
+    ['📡 Kết nối đến VNPay (Test)...', 'Đang thiết lập kết nối an toàn'],
+    ['💳 Đang xử lý giao dịch...', 'Mã hóa dữ liệu thẻ/tài khoản'],
+    ['✅ Xác nhận giao dịch...', 'Đang nhận phản hồi từ ngân hàng'],
+    ['📦 Chuẩn bị tài nguyên...', 'Tạo link tải xuống an toàn'],
+  ];
+
+  for(const [txt,sub] of steps){
+    loadingText.textContent = txt;
+    loadingSubText.textContent = sub;
+    await sleep(700 + Math.random()*400);
+  }
+
+  loading.classList.remove('show');
+  onPaymentSuccess({ testMode:true });
+}
+
+/* ═══════════════════════════════════════════════════════
+   REAL PAYMENT — VNPAY INTEGRATION
+   Tài liệu: https://sandbox.vnpayment.vn/apis/docs/thanh-toan-pay/pay.html
+═══════════════════════════════════════════════════════ */
+async function processRealPayment(){
+  if(!CONFIG.vnpayTmn || !CONFIG.vnpaySecret){
+    alert('⚠️ Chưa cấu hình VNPay TMN Code và Secret Key.\nNhấp biểu tượng ⚙️ ở góc dưới phải để cài đặt.');
+    return;
+  }
+
+  const loading = document.getElementById('payLoading');
+  loading.classList.add('show');
+  document.getElementById('loadingText').textContent = '🔐 Đang tạo đơn hàng...';
+  document.getElementById('loadingSubText').textContent = 'Chuẩn bị chuyển đến VNPay';
+
+  try {
+    const orderId   = 'CCW' + Date.now();
+    const amount    = PRODUCT.price * 100; // VNPay tính theo đồng × 100
+    const orderInfo = encodeURIComponent('Thanh toan Claude Co-work Mastery');
+    const returnUrl = encodeURIComponent(CONFIG.returnUrl || window.location.href);
+    const ipAddr    = '127.0.0.1'; // Production: lấy IP thật từ server
+
+    // ────────────────────────────────────────────────────────────
+    // ⚠️  LƯU Ý QUAN TRỌNG — BẢO MẬT:
+    //
+    // Việc tạo chữ ký HMAC-SHA512 với Secret Key PHẢI được thực hiện
+    // ở phía SERVER (Node.js / PHP / Python...), KHÔNG phải ở frontend.
+    // Đoạn code dưới đây là pseudo-code minh họa luồng.
+    //
+    // Trong production, bạn cần:
+    //   1. Gọi API backend của bạn: POST /api/create-payment
+    //   2. Backend tạo URL VNPay đã ký → trả về cho frontend
+    //   3. Frontend redirect đến URL đó
+    //
+    // Ví dụ backend (Node.js): https://github.com/vnpay/vnpay-node-sdk
+    // ────────────────────────────────────────────────────────────
+
+    // GỌI BACKEND để lấy VNPay URL (bạn tự xây backend hoặc dùng Vercel/Netlify Function)
+    const backendResponse = await callBackend_CreatePayment({
+      orderId,
+      amount,
+      orderInfo: 'Thanh toan Claude Co-work Mastery',
+      returnUrl: CONFIG.returnUrl,
+      customerEmail: document.getElementById('email').value,
+      customerName:  `${document.getElementById('firstName').value} ${document.getElementById('lastName').value}`,
+      customerPhone: document.getElementById('phone').value,
+      vnpayTmn:    CONFIG.vnpayTmn,
+      // KHÔNG gửi secret lên đây nếu backend riêng — backend tự đọc từ env vars
+    });
+
+    loading.classList.remove('show');
+
+    if(backendResponse.paymentUrl){
+      // Lưu orderId để xác nhận sau khi return
+      sessionStorage.setItem('ccw_pending_order', orderId);
+      sessionStorage.setItem('ccw_customer_email', document.getElementById('email').value);
+      window.location.href = backendResponse.paymentUrl;
+    } else {
+      throw new Error(backendResponse.message || 'Không tạo được link thanh toán');
+    }
+
+  } catch(err){
+    loading.classList.remove('show');
+    showPaymentError(err.message);
+  }
+}
+
+/* ─── Gọi Backend API (thay bằng URL thật của bạn) ─── */
+async function callBackend_CreatePayment(params){
+  /*
+   * ĐÂY LÀ NƠI BẠN GỌI BACKEND CỦA MÌNH.
+   *
+   * Ví dụ với Vercel Serverless Function:
+   *   const res = await fetch('/api/create-payment', {
+   *     method: 'POST',
+   *     headers: {'Content-Type':'application/json'},
+   *     body: JSON.stringify(params)
+   *   });
+   *   return res.json();
+   *
+   * Ví dụ với Express backend:
+   *   const res = await fetch('https://api.yoursite.com/payment/create', {...});
+   *
+   * Backend cần trả về: { paymentUrl: "https://pay.vnpay.vn/vpcpay.html?..." }
+   */
+
+  // Placeholder — THAY THẾ bằng endpoint thật của bạn:
+  const BACKEND_URL = '/api/create-payment'; // <-- CẬP NHẬT URL NÀY
+
+  const res = await fetch(BACKEND_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(params)
+  });
+
+  if(!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+  return res.json();
+}
+
+/* ═══════════════════════════════════════════════════════
+   XỬ LÝ SAU KHI VNPAY REDIRECT VỀ
+   (Gọi khi URL có tham số vnp_ResponseCode)
+═══════════════════════════════════════════════════════ */
+function handleVNPayReturn(){
+  const params = new URLSearchParams(window.location.search);
+  const responseCode = params.get('vnp_ResponseCode');
+  const txnRef       = params.get('vnp_TxnRef');
+  const amount       = params.get('vnp_Amount');
+  const orderInfo    = params.get('vnp_OrderInfo');
+
+  if(responseCode === '00'){
+    // ✅ Thanh toán thành công
+    // Verify thêm ở backend trước khi mở download (production)
+    onPaymentSuccess({
+      orderId:   txnRef,
+      amount:    parseInt(amount)/100,
+      orderInfo: orderInfo,
+      testMode:  false
+    });
+    // Xóa params khỏi URL
+    window.history.replaceState({}, '', window.location.pathname);
+  } else if(responseCode){
+    const errorMessages = {
+      '07': 'Giao dịch bị nghi ngờ gian lận.',
+      '09': 'Thẻ/TK chưa đăng ký dịch vụ Internet Banking.',
+      '10': 'Xác thực thông tin thẻ/TK quá 3 lần.',
+      '11': 'Đã hết hạn chờ thanh toán.',
+      '12': 'Thẻ/TK bị khóa.',
+      '13': 'Sai mật khẩu OTP.',
+      '24': 'Giao dịch bị hủy.',
+      '51': 'Số dư không đủ.',
+      '65': 'Vượt hạn mức giao dịch ngày.',
+      '75': 'Ngân hàng đang bảo trì.',
+      '79': 'Sai mật khẩu thanh toán quá số lần cho phép.',
+      '99': 'Lỗi không xác định.'
+    };
+    showPaymentError(errorMessages[responseCode] || `Lỗi ${responseCode}`);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   PAYMENT SUCCESS — MỞ DOWNLOAD
+═══════════════════════════════════════════════════════ */
+function onPaymentSuccess(data){
+  const orderId = data.orderId || ('CCW-' + Math.floor(Math.random()*900000+100000));
+  const email   = document.getElementById('email')?.value || sessionStorage.getItem('ccw_customer_email') || 'bạn@email.com';
+
+  // Update modal
+  document.getElementById('modalOrderId').textContent = 'Mã đơn: #' + orderId;
+  document.getElementById('modalEmail').textContent   = email;
+
+  // Setup download links
+  const pdfUrl = CONFIG.pdfUrl || '#';
+  const zipUrl = CONFIG.zipUrl || '#';
+
+  const dlBtn = document.getElementById('downloadBtn');
+  dlBtn.href     = pdfUrl;
+  dlBtn.download = 'Claude-Cowork-Mastery-Ebook.pdf';
+  if(pdfUrl === '#'){
+    dlBtn.onclick = ()=>{ alert('⚙️ Chưa cấu hình URL PDF.\nVào ⚙️ → điền URL PDF vào ô "URL file PDF Ebook".'); return false; };
+  }
+
+  const zipBtn = document.getElementById('downloadBonusBtn');
+  zipBtn.onclick = ()=>{
+    if(zipUrl === '#'){
+      alert('⚙️ Chưa cấu hình URL Skills ZIP.\nVào ⚙️ → điền URL vào ô "URL file Skills ZIP".');
+    } else {
+      const a = document.createElement('a');
+      a.href = zipUrl; a.download='Claude-Cowork-7-Skills.zip'; a.click();
+    }
+  };
+
+  // Show modal
+  document.getElementById('successModal').classList.add('show');
+
+  // Log (trong production, gửi confirmation email từ backend)
+  console.log('[CCW] Payment confirmed:', { orderId, email, testMode: data.testMode });
+}
+
+function showPaymentError(msg){
+  alert('❌ Thanh toán thất bại\n\n' + msg + '\n\nVui lòng thử lại hoặc liên hệ hỗ trợ.');
+}
+
+/* ═══════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════ */
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+/* Auto-clear errors on input */
+['firstName','lastName','email','phone','cardNumber','cardExpiry','cardCvv','cardName'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', ()=>clearError(id));
+});
+
+/* Kiểm tra VNPay return params khi load trang */
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(window.location.search.includes('vnp_ResponseCode')){
+    handleVNPayReturn();
+  }
+  selectMethod('vnpay'); // default
+});
+
+/* Close modal khi click overlay */
+document.getElementById('successModal').addEventListener('click', function(e){
+  if(e.target === this) this.classList.remove('show');
+});
+</script>
+
+</body>
+</html>
